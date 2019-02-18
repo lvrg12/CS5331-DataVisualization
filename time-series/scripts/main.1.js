@@ -1,14 +1,18 @@
-var margin = {top: 40, right: 20, bottom: 30, left: 40};
-var width = 10000 - margin.left - margin.right;
-var height = 550 - margin.top - margin.bottom;
+const winw = window.innerWidth/1.05;
+const winh = window.innerHeight/1.05;
+var margin = {top: 40, right: 40, bottom: 40, left: 40};
+var width = winw - margin.left - margin.right;
+var height = winh - margin.top - margin.bottom;
+var leftOffset = 40;
 
 var formatPercent = d3.format(".0%");
+var formatYear = d3.format("d");
 
-var x = d3.scale
-	// .linear()
-	// .range([0,width],.1);
-	.ordinal()
-	.rangeRoundBands([0, width], .1);
+var x = d3.time
+	.scale()
+	.range([0,width])
+	// .ordinal()
+	// .rangeRoundBands([0, width], .1);
 
 var y = d3.scale
 	.linear()
@@ -16,8 +20,9 @@ var y = d3.scale
 
 var xAxis = d3.svg.axis()
     .scale(x)
-	.orient("bottom");
-	// .rotate(90);
+	.tickSize(-height)
+	.tickFormat(formatYear)
+	.ticks(20);
 
 var yAxis = d3.svg.axis()
     .scale(y)
@@ -39,7 +44,6 @@ var svg = d3.select("body").append("svg")
 svg.call(tip);
 
 // load data
-// d3.tsv("data/data.tsv", type, (error,data) => initSVG(data) );
 d3.csv("data/data.1.csv", data => initJSON(data) );
 
 // init json
@@ -64,26 +68,22 @@ function initJSON( data )
 	initSVG( json );
 }
 
-var what = [4,5,6,7,8];
-
 // init svg
 function initSVG( data )
 {
-	var arr = [...Array(2016-1800).keys()];
-	arr.forEach( (v,i,a) => a[i]=v+1800 );
-	x.domain( arr );
-	// var m = 0;
-	// for( var c in data )
-	// {
-	// 	if( !data.hasOwnProperty(c) ) continue;
-	// 	m = d3.max( d3.values(data[c].debt) ) > m ? d3.max( d3.values(data[c].debt) ) : m;
-	// }
+	x.domain( [1800,2015] );
 	y.domain( [0,3.0] );
 
   	svg.append("g")
     	.attr("class", "x axis")
-      	.attr("transform", "translate(-80," + height + ")")
-      	.call(xAxis);
+      	.attr("transform", "translate(" + leftOffset + "," + height + ")")
+		.call(xAxis)
+		// .selectAll("text")
+		// .attr("y", 0)
+		// .attr("x", 10)
+		// .attr("dy", ".35em")
+		// .attr("transform", "rotate(-90)")
+		// .style("text-anchor", "start");
 
 	svg.append("g")
 		.attr("class", "y axis")
@@ -95,18 +95,26 @@ function initSVG( data )
 		.style("text-anchor", "end")
 		.text("Debt to GDP Ratio");
 
-	// console.log(x.rangeBand());
-
 	svg.selectAll(".bar")
 		.data(data["United Kingdom"].debt)
 		.enter().append("rect")
 		.attr("class", "bar")
-		.attr("x", (d,i) => x(i+1800) - 80 )
-		.attr("width", x.rangeBand() )
+		.attr("x", (d,i) => x(i+1800) + leftOffset - winh/200 )
+		.attr("width", winh/100 )
 		.attr("y", (d,i) => y(d[i+1800]) )
 		.attr("height", (d,i) => height - y(d[i+1800]) )
 		.on('mouseover', tip.show)
 		.on('mouseout', tip.hide)
+
+	// svg.selectAll(".circle")
+	// 	.data(data["United Kingdom"].debt)
+	// 	.enter().append("circle")
+	// 	.attr("class", "circle")
+	// 	.attr("cx", (d,i) => x(i+1800) + leftOffset )
+	// 	.attr("r", 3 )
+	// 	.attr("cy", (d,i) => y(d[i+1800]) )
+	// 	.on('mouseover', tip.show)
+	// 	.on('mouseout', tip.hide)
 
 }
 
