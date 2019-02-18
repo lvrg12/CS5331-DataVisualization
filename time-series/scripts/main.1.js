@@ -1,6 +1,6 @@
 var margin = {top: 40, right: 20, bottom: 30, left: 40};
-var width = 960 - margin.left - margin.right;
-var height = 500 - margin.top - margin.bottom;
+var width = 10000 - margin.left - margin.right;
+var height = 550 - margin.top - margin.bottom;
 
 var formatPercent = d3.format(".0%");
 
@@ -27,7 +27,7 @@ var yAxis = d3.svg.axis()
 var tip = d3.tip()
   .attr('class', 'd3-tip')
   .offset([-10, 0])
-  .html( (d,i) => "<strong>Debt:</strong> <span style='color:red'>" + d[i+1800] + "</span>" );
+  .html( (d,i) => "<strong>Debt:</strong> <span style='color:red'>" + Math.round(d[i+1800]*100) + "%</span>" );
 
 // create svg
 var svg = d3.select("body").append("svg")
@@ -69,9 +69,8 @@ var what = [4,5,6,7,8];
 // init svg
 function initSVG( data )
 {
-	var arr = [...Array(2015-1800).keys()];
+	var arr = [...Array(2016-1800).keys()];
 	arr.forEach( (v,i,a) => a[i]=v+1800 );
-
 	x.domain( arr );
 	// var m = 0;
 	// for( var c in data )
@@ -79,11 +78,11 @@ function initSVG( data )
 	// 	if( !data.hasOwnProperty(c) ) continue;
 	// 	m = d3.max( d3.values(data[c].debt) ) > m ? d3.max( d3.values(data[c].debt) ) : m;
 	// }
-	y.domain( [0,2.0] );
+	y.domain( [0,3.0] );
 
   	svg.append("g")
     	.attr("class", "x axis")
-      	.attr("transform", "translate(0," + height + ")")
+      	.attr("transform", "translate(-80," + height + ")")
       	.call(xAxis);
 
 	svg.append("g")
@@ -102,7 +101,7 @@ function initSVG( data )
 		.data(data["United Kingdom"].debt)
 		.enter().append("rect")
 		.attr("class", "bar")
-		.attr("x", (d,i) => i *4 + 20 )
+		.attr("x", (d,i) => x(i+1800) - 80 )
 		.attr("width", x.rangeBand() )
 		.attr("y", (d,i) => y(d[i+1800]) )
 		.attr("height", (d,i) => height - y(d[i+1800]) )
