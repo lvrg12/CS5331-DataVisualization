@@ -34,10 +34,10 @@ var zoom = d3.zoom()
     .on("zoom", zoomed);
 	
 // create tip
-// var tip = d3.tip()
-//   .attr('class', 'd3-tip')
-//   .offset([-10, 0])
-//   .html( (d,i) => "<strong>Debt:</strong> <span style='color:red'>" + Math.round(d[i+1800]*100) + "%</span>" );
+var tip = d3.tip()
+  .attr('class', 'tooltip')
+  .offset([-10, 0])
+  .html( (d,i) => "<strong>Debt:</strong> <span style='color:red'>" + Math.round(d[i+1800]*100) + "%</span>" );
 
 // create menu
 var menu = document.createElement('div');
@@ -82,7 +82,7 @@ function initSVG( data )
 	.append("g")
 	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-	// svg.call(tip);
+	svg.call(tip);
 
 	x.domain( [1800,2015] );
 	y.domain( [0,3.0] );
@@ -171,7 +171,8 @@ function toggleCountry( data, country )
 
 function addCountry( data, country, color )
 {
-	resetZoom();
+	drawing = true;
+	// resetZoom();
 
 	var line = d3.line()
     	.x( (d,i) => x(i+1800) )
@@ -201,20 +202,31 @@ function addCountry( data, country, color )
         .transition()
 		.duration(5000)
 		.ease(d3.easePolyInOut)
-		.attr("stroke-dashoffset", 0);
+		.attr("stroke-dashoffset", 0)
+		.on( "end", (d,i) => addPoints( data, country, color ) )
 
-	// svg.selectAll("."+country+"-dot")
-	// 	.data(data[country].debt)
-	// 	.enter()
-	// 	.append("circle")
-	// 	.attr("class", country+"-dot")
-	// 	.attr("cx", (d,i) => x(i+1800) )
-	// 	.attr("r", (d,i) => y(d[i+1800]) ? 3 : 0 )
-	// 	.attr("cy", (d,i) => y(d[i+1800]) ? y(d[i+1800]) : y(0) )
-	// 	.attr("fill",color)
-	// 	.on('mouseover', tip.show)
-	// 	.on('mouseout', tip.hide)
+}
 
+function addPoints( data, country, color )
+{
+	svg.selectAll("#"+country+"-dot")
+		.data(data[country].debt)
+		.enter()
+		.append("circle")
+		.on('mouseover', tip.show)
+      	.on('mouseout', tip.hide)
+		.attr("class", (d,i) => y(d[i+1800]) ? "dot" : "delete" )
+		.attr("id",country+"-dot")
+		.attr("cx", (d,i) => x(i+1800) )
+		.attr("cy", (d,i) => y(d[i+1800]) ? y(d[i+1800]) : y(0) )
+		.attr("fill",color)
+		.transition()
+		.attr("r", (d,i) => y(d[i+1800]) ? 2 : 0 )
+		.duration(1000)
+
+	svg.selectAll(".delete")
+		.remove();
+	
 }
 
 function remCountry( data, country )
@@ -226,21 +238,23 @@ function remCountry( data, country )
 		.remove();
 }
 
-// function toggleDots()
-// {
-// 	console.log("check");
-// }
-
 function resetZoom()
 {
 	d3.selectAll(".path")
-	.call(zoom.transform, d3.zoomIdentity)
-	.transition()
-    .duration(2000);
+		.call(zoom.transform, d3.zoomIdentity)
+		.transition()
+		.duration(2000);
+	
+	d3.selectAll(".dot")
+		.attr("r",2);
 }
 
 function zoomed()
 {
+	d3.selectAll(".dot")
+		.attr("transform", d3.event.transform)
+		.attr("r",4/d3.event.transform.k)
+
     d3.selectAll(".path")
         .attr("transform", d3.event.transform);
 	d3.selectAll('.path')

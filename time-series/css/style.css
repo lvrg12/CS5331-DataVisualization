@@ -61,7 +61,7 @@ path
 }
 
 /* ------------------------ tooltip -------------------- */
-.d3-tip
+.tooltip
 {
 	line-height: 1;
 	font-weight: bold;
@@ -71,7 +71,7 @@ path
 	border-radius: 2px;
 }
 
-.d3-tip:after
+.tooltip:after
 {
 	box-sizing: border-box;
 	display: inline;
@@ -84,7 +84,7 @@ path
 	text-align: center;
 }
 
-.d3-tip.n:after
+.tooltip.n:after
 {
 	margin: -1px 0 0 0;
 	top: 100%;
