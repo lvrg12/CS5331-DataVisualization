@@ -1,49 +1,49 @@
-const winw = window.innerWidth/1.05;
-const winh = window.innerHeight/1.5;
-var margin = {top: 40, right: 40, bottom: 40, left: 40};
+const winw = window.innerWidth/1.25;
+const winh = window.innerHeight/1.1;
+var margin = {top: 20, right: 40, bottom: 40, left: 40};
 var width = winw - margin.left - margin.right;
 var height = winh - margin.top - margin.bottom;
-var leftOffset = 40;
 
 var formatPercent = d3.format(".0%");
 var formatYear = d3.format("d");
+var c10 = d3.scaleOrdinal(d3.schemeCategory10);
+var zoomable = true;
+var svg, gx, gy;
+var path = {};
 
-var x = d3.time
-	.scale()
+// creating scale axis
+var x = d3
+	.scaleTime()
 	.range([0,width])
-	// .ordinal()
-	// .rangeRoundBands([0, width], .1);
 
-var y = d3.scale
-	.linear()
+var y = d3
+	.scaleLinear()
 	.range([height, 0]);
 
-var xAxis = d3.svg.axis()
-    .scale(x)
+var xAxis = d3
+	.axisBottom(x)
 	.tickSize(-height)
 	.tickFormat(formatYear)
-	.ticks(20);
+	// .ticks(20);
 
-var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left")
-    .tickFormat(formatPercent);
+var yAxis = d3
+	.axisRight(y)
+	.tickFormat(formatPercent);
+	
+var zoom = d3.zoom()
+    .scaleExtent([1, 10])
+    .on("zoom", zoomed);
+	
+// create tip
+// var tip = d3.tip()
+//   .attr('class', 'd3-tip')
+//   .offset([-10, 0])
+//   .html( (d,i) => "<strong>Debt:</strong> <span style='color:red'>" + Math.round(d[i+1800]*100) + "%</span>" );
 
-var tip = d3.tip()
-  .attr('class', 'd3-tip')
-  .offset([-10, 0])
-  .html( (d,i) => "<strong>Debt:</strong> <span style='color:red'>" + Math.round(d[i+1800]*100) + "%</span>" );
-
-// create svg
-var svg = d3.select("body").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
+// create menu
 var menu = document.createElement('div');
-
-svg.call(tip);
+menu.className = "menu";
+document.getElementById("container").append(menu);
 
 // load data
 d3.csv("data/data.csv", data => initJSON(data) );
@@ -55,6 +55,7 @@ function initJSON( data )
 	for( country in data )
 	{
 		if( !data.hasOwnProperty(country) ) continue;
+		if( !data[country]["Country Name"] ) continue;
 
 		var tmp = [];
 		for( var y=1800; y<2016; y++ )
@@ -64,7 +65,8 @@ function initJSON( data )
 			tmp.push( obj );
 		}
 
-		json[data[country]["Country Name"]] = { debt : tmp };
+		var c_name = data[country]["Country Name"].replace(" ","-");
+		json[c_name] = { debt : tmp };
 	}
 
 	initSVG( json );
@@ -73,75 +75,108 @@ function initJSON( data )
 // init svg
 function initSVG( data )
 {
+	// create svg
+	svg = d3.select("#container").append("svg")
+	.call(zoom)
+	.attr("width", width + margin.left + margin.right)
+	.attr("height", height + margin.top + margin.bottom)
+	.append("g")
+	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+	// svg.call(tip);
+
 	x.domain( [1800,2015] );
 	y.domain( [0,3.0] );
 
-  	svg.append("g")
+  	gx = svg.append("g")
     	.attr("class", "x axis")
-      	.attr("transform", "translate(" + leftOffset + "," + height + ")")
+		.attr("transform", "translate(0," + height + ")")
+		.style("fill", "white")
 		.call(xAxis)
-		// .selectAll("text")
-		// .attr("y", 0)
-		// .attr("x", 10)
-		// .attr("dy", ".35em")
-		// .attr("transform", "rotate(-90)")
-		// .style("text-anchor", "start");
 
-	svg.append("g")
+	gy = svg.append("g")
 		.attr("class", "y axis")
+		.attr("transform", "translate(" + width + ",0)")
+		.style("fill", "white")
 		.call(yAxis)
 		.append("text")
-		.attr("transform", "rotate(-90)")
-		.attr("y", 6)
-		.attr("dy", ".71em")
-		.style("text-anchor", "end")
-	.text("Debt to GDP Ratio");
+		.attr("y", -12)
+		.attr("x", -8)
+		.style("text-anchor", "middle")
+		.style("fill", "white")
+		.text("Debt to GDP Ratio");
 	
 	addMenu( data );
-	// addCountry( data, "Mexico" );
     
 }
 
 function addMenu( data )
 {
-	menu.className = "menu";
+	var space = document.createElement("div");
+	space.className = "space-menu";
+	menu.append(space);
+
+	var space = document.createElement("div");
+	space.className = "space-menu";
+
 	var vertical = document.createElement("div");
 	vertical.className = "vertical-menu";
 
-	var country = Object.keys(data);
+	var country = Object.keys(data).sort();
 	var button;
 
 	for( var c=0; c<country.length; c++ )
 	{
 		button = document.createElement("a");
 		button.id = country[c];
-		button.innerHTML = country[c];
+		button.innerHTML = country[c].replace("-"," ");
 		button.onclick = e => toggleCountry(data,e.srcElement.id);
 		vertical.append(button);
 	}
+
+	var checkbox = document.createElement("input");
+	checkbox.type = "checkbox";
+	checkbox.className = "dot-checkbox";
+	checkbox.onclick = e => toggleDots();
+
+	var checkboxes = document.createElement("div");
+	checkboxes.className = "checkbox";
+	checkboxes.append(checkbox);
+	checkboxes.append(document.createTextNode("Show Detail"));
+
 	menu.append(vertical);
-	document.body.append(menu);
+	menu.append(space);
+	menu.append(checkboxes);
 }
 
 function toggleCountry( data, country )
 {
 	var button = document.getElementById(country);
+	var color = c10(country);
+
 	if( button.className == "" )
 	{
 		button.className = "active";
-		addCountry( data, country );
+		button.style.backgroundColor = color;
+		addCountry( data, country, color );
 	}
 	else
 	{
 		button.className = "";
-		// remCountry( data, country );
+		button.style.backgroundColor = "";
+		remCountry( data, country );
 	}
 
 	console.log(country);
 }
 
-function addCountry( data, country )
+function addCountry( data, country, color )
 {
+	var line = d3.line()
+    	.x( (d,i) => x(i+1800) )
+    	.y( (d,i) => y(d[i+1800]) ? y(d[i+1800]) : y(0) )
+		.curve(d3.curveMonotoneX);
+		
   	// svg.selectAll(".bar")
 	// 	.data(data[country].debt)
 	// 	.enter().append("rect")
@@ -153,14 +188,68 @@ function addCountry( data, country )
 	// 	.on('mouseover', tip.show)
 	// 	.on('mouseout', tip.hide)
 
-	svg.selectAll("."+country)
-		.data(data[country].debt)
-		.enter().append("circle")
-		.attr("class", "circle")
-		.attr("cx", (d,i) => x(i+1800) + leftOffset )
-		.attr("r", 1 )
-		.attr("cy", (d,i) => y(d[i+1800]) ? y(d[i+1800]) : y(0) )
-		.on('mouseover', tip.show)
-		.on('mouseout', tip.hide)
+	var path = svg.append("g")
+		.attr("class","charts")
+		.append("path")
+			.attr("class", "path")
+			.attr("id", country+"-path")
+			.attr("d", line(data[country].debt))
+			.attr("stroke",color);
 
+	var totalLength = path.node().getTotalLength();
+	path.attr("stroke-dasharray", totalLength + " " + totalLength)
+        .attr("stroke-dashoffset", totalLength)
+        .transition()
+		.duration(5000)
+		.ease(d3.easePolyInOut)
+		.attr("stroke-dashoffset", 0);
+
+	var d0 = 1800,
+		d1 = 2015;
+
+	// Gratuitous intro zoom!
+	// svg.call(zoom)
+	// 	.transition()
+	// 	.duration(1500)
+	// 	.call(zoom.transform, d3.zoomIdentity
+	// 	.scale(width / (x(d1) - x(d0)))
+	// 	.translate(-x(d0), 0));
+
+	// svg.selectAll("."+country+"-dot")
+	// 	.data(data[country].debt)
+	// 	.enter()
+	// 	.append("circle")
+	// 	.attr("class", country+"-dot")
+	// 	.attr("cx", (d,i) => x(i+1800) )
+	// 	.attr("r", (d,i) => y(d[i+1800]) ? 3 : 0 )
+	// 	.attr("cy", (d,i) => y(d[i+1800]) ? y(d[i+1800]) : y(0) )
+	// 	.attr("fill",color)
+	// 	.on('mouseover', tip.show)
+	// 	.on('mouseout', tip.hide)
+
+}
+
+function remCountry( data, country )
+{
+	svg.selectAll("#"+country+"-path")
+		.remove();
+
+	svg.selectAll("#"+country+"-dot")
+		.remove();
+}
+
+function toggleDots()
+{
+	console.log("check");
+}
+
+function zoomed()
+{
+    d3.selectAll(".path")
+        .attr("transform", d3.event.transform);
+	d3.selectAll('.path')
+		.style("stroke-width", 2/d3.event.transform.k);
+
+    gx.call(xAxis.scale(d3.event.transform.rescaleX(x)));
+    gy.call(yAxis.scale(d3.event.transform.rescaleY(y)));
 }

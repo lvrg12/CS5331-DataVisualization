@@ -1,20 +1,55 @@
 body
 {
-	font: 10px sans-serif;
+	font-family: 'Roboto Condensed', sans-serif;
+	font-size: 10px;
+	background-color: black;
+}
+
+h1
+{
+	width: 100%;
+	text-align: center;
+	color: white;
+}
+
+#container
+{
+	display: flex;
+}
+
+/* ------------------------ lines -------------------- */
+path
+{
+	/* stroke: black; */
+    stroke-width: 1.5;
+    fill: none;
+}
+
+/* ------------------------ axis -------------------- */
+
+.y.axis g.tick text, .x.axis g.tick text
+{
+	fill: white;
 }
 
 .axis path, .axis line
 {
 	fill: none;
-	stroke: #000;
+	stroke: white;
 	shape-rendering: crispEdges;
 }
 
-/* .x.axis g.tick
+.x.axis path
 {
-	opacity: 0.1;
-} */
+	display: none;
+}
 
+.x.axis g.tick line
+{
+	opacity: 0.3;
+}
+
+/* ------------------------ bars -------------------- */
 .bar
 {
 	fill: orange;
@@ -25,18 +60,13 @@ body
 	fill: orangered ;
 }
 
-.x.axis path
-{
-	display: none;
-}
-
 /* ------------------------ tooltip -------------------- */
 .d3-tip
 {
 	line-height: 1;
 	font-weight: bold;
 	padding: 12px;
-	background: rgba(0, 0, 0, 0.8);
+	background: rgba(60, 60, 60, 0.8);
 	color: #fff;
 	border-radius: 2px;
 }
@@ -48,7 +78,7 @@ body
 	font-size: 10px;
 	width: 100%;
 	line-height: 1;
-	color: rgba(0, 0, 0, 0.8);
+	color: rgba(60, 60, 60, 0.8);
 	content: "\25BC";
 	position: absolute;
 	text-align: center;
@@ -64,10 +94,26 @@ body
 
 /* ------------------------ menu -------------------- */
 
+.menu
+{
+	width: auto;
+	height: 100%;
+	display: block;
+}
+
+.space-menu
+{
+	height: 20px;
+}
+
+.checkbox
+{
+	/* display: flex; */
+	color: white;
+}
+
 .vertical-menu
 {
-	width: 15%;
-	height: 180px;
 	overflow-y: scroll;
 }
   
@@ -87,6 +133,6 @@ body
   
   .vertical-menu a.active
 {
-	background-color: #4CAF50;
+	/* background-color: #4CAF50; */
 	color: white;
 }
