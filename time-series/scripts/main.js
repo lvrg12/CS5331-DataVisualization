@@ -45,7 +45,7 @@ menu.className = "menu";
 document.getElementById("container").append(menu);
 
 // load data
-d3.csv("data/data.csv", data => initJSON(data) );
+d3.csv("data/data2.csv", data => initJSON(data) );
 
 // init json
 var json = {};
@@ -101,7 +101,7 @@ function initSVG( data )
 	
 	svg.append("text")
 		.attr("y", -12)
-		.attr("x", 600)
+		.attr("x", width - 30)
 		.style("text-anchor", "start")
 		.style("fill", "white")
 		.text("Debt to GDP Ratio");
@@ -221,7 +221,7 @@ function addPoints( data, country, color )
 		.attr("cy", (d,i) => y(d[i+1800]) ? y(d[i+1800]) : y(0) )
 		.attr("fill",color)
 		.transition()
-		.attr("r", (d,i) => y(d[i+1800]) ? 2 : 0 )
+		.attr("r", (d,i) => y(d[i+1800]) ? 1.5 : 0 )
 		.duration(1000)
 
 	svg.selectAll(".delete")
@@ -246,7 +246,7 @@ function resetZoom()
 		.duration(2000);
 	
 	d3.selectAll(".dot")
-		.attr("r",2);
+		.attr("r",1.5);
 }
 
 function zoomed()
