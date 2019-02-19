@@ -1,5 +1,5 @@
 const winw = window.innerWidth/1.05;
-const winh = window.innerHeight/1.05;
+const winh = window.innerHeight/1.5;
 var margin = {top: 40, right: 40, bottom: 40, left: 40};
 var width = winw - margin.left - margin.right;
 var height = winh - margin.top - margin.bottom;
@@ -98,7 +98,7 @@ function initSVG( data )
 	.text("Debt to GDP Ratio");
 	
 	addMenu( data );
-	addCountry( data, "Mexico" );
+	// addCountry( data, "Mexico" );
     
 }
 
@@ -116,34 +116,51 @@ function addMenu( data )
 		button = document.createElement("a");
 		button.id = country[c];
 		button.innerHTML = country[c];
-		// button.onclick = e => addCountry(json,e.srcElement.innerHTML);
+		button.onclick = e => toggleCountry(data,e.srcElement.id);
 		vertical.append(button);
 	}
 	menu.append(vertical);
 	document.body.append(menu);
 }
 
+function toggleCountry( data, country )
+{
+	var button = document.getElementById(country);
+	if( button.className == "" )
+	{
+		button.className = "active";
+		addCountry( data, country );
+	}
+	else
+	{
+		button.className = "";
+		// remCountry( data, country );
+	}
+
+	console.log(country);
+}
+
 function addCountry( data, country )
 {
-  svg.selectAll(".bar")
-		.data(data[country].debt)
-		.enter().append("rect")
-		.attr("class", "bar")
-		.attr("x", (d,i) => x(i+1800) + leftOffset - winh/200 )
-		.attr("width", winh/100 )
-		.attr("y", (d,i) => y(d[i+1800]) ? y(d[i+1800]) : y(0) )
-		.attr("height", (d,i) => y(d[i+1800]) ? height - y(d[i+1800]) : height - y(0) )
-		.on('mouseover', tip.show)
-		.on('mouseout', tip.hide)
-
-	// svg.selectAll(".circle")
-	// 	.data(data["United Kingdom"].debt)
-	// 	.enter().append("circle")
-	// 	.attr("class", "circle")
-	// 	.attr("cx", (d,i) => x(i+1800) + leftOffset )
-	// 	.attr("r", 3 )
-	// 	.attr("cy", (d,i) => y(d[i+1800]) )
+  	// svg.selectAll(".bar")
+	// 	.data(data[country].debt)
+	// 	.enter().append("rect")
+	// 	.attr("class", "bar")
+	// 	.attr("x", (d,i) => x(i+1800) + leftOffset - winh/200 )
+	// 	.attr("width", winh/100 )
+	// 	.attr("y", (d,i) => y(d[i+1800]) ? y(d[i+1800]) : y(0) )
+	// 	.attr("height", (d,i) => y(d[i+1800]) ? height - y(d[i+1800]) : height - y(0) )
 	// 	.on('mouseover', tip.show)
 	// 	.on('mouseout', tip.hide)
+
+	svg.selectAll("."+country)
+		.data(data[country].debt)
+		.enter().append("circle")
+		.attr("class", "circle")
+		.attr("cx", (d,i) => x(i+1800) + leftOffset )
+		.attr("r", 1 )
+		.attr("cy", (d,i) => y(d[i+1800]) ? y(d[i+1800]) : y(0) )
+		.on('mouseover', tip.show)
+		.on('mouseout', tip.hide)
 
 }
