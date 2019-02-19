@@ -9,7 +9,6 @@ var formatYear = d3.format("d");
 var c10 = d3.scaleOrdinal(d3.schemeCategory10);
 var zoomable = true;
 var svg, gx, gy;
-var path = {};
 
 // creating scale axis
 var x = d3
@@ -77,9 +76,9 @@ function initSVG( data )
 {
 	// create svg
 	svg = d3.select("#container").append("svg")
-	.call(zoom)
 	.attr("width", width + margin.left + margin.right)
 	.attr("height", height + margin.top + margin.bottom)
+	.call(zoom)
 	.append("g")
 	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -99,10 +98,11 @@ function initSVG( data )
 		.attr("transform", "translate(" + width + ",0)")
 		.style("fill", "white")
 		.call(yAxis)
-		.append("text")
+	
+	svg.append("text")
 		.attr("y", -12)
-		.attr("x", -8)
-		.style("text-anchor", "middle")
+		.attr("x", 600)
+		.style("text-anchor", "start")
 		.style("fill", "white")
 		.text("Debt to GDP Ratio");
 	
@@ -134,19 +134,18 @@ function addMenu( data )
 		vertical.append(button);
 	}
 
-	var checkbox = document.createElement("input");
-	checkbox.type = "checkbox";
-	checkbox.className = "dot-checkbox";
-	checkbox.onclick = e => toggleDots();
+	var reset = document.createElement("a");
+	reset.className = "reset";
+	reset.innerHTML = "RESET"
+	reset.onclick = e => resetZoom();
 
-	var checkboxes = document.createElement("div");
-	checkboxes.className = "checkbox";
-	checkboxes.append(checkbox);
-	checkboxes.append(document.createTextNode("Show Detail"));
+	var toggles = document.createElement("div");
+	toggles.className = "toggles";
+	toggles.append(reset);
 
 	menu.append(vertical);
 	menu.append(space);
-	menu.append(checkboxes);
+	menu.append(toggles);
 }
 
 function toggleCountry( data, country )
@@ -172,6 +171,8 @@ function toggleCountry( data, country )
 
 function addCountry( data, country, color )
 {
+	resetZoom();
+
 	var line = d3.line()
     	.x( (d,i) => x(i+1800) )
     	.y( (d,i) => y(d[i+1800]) ? y(d[i+1800]) : y(0) )
@@ -188,9 +189,7 @@ function addCountry( data, country, color )
 	// 	.on('mouseover', tip.show)
 	// 	.on('mouseout', tip.hide)
 
-	var path = svg.append("g")
-		.attr("class","charts")
-		.append("path")
+	var path = svg.append("path")
 			.attr("class", "path")
 			.attr("id", country+"-path")
 			.attr("d", line(data[country].debt))
@@ -203,17 +202,6 @@ function addCountry( data, country, color )
 		.duration(5000)
 		.ease(d3.easePolyInOut)
 		.attr("stroke-dashoffset", 0);
-
-	var d0 = 1800,
-		d1 = 2015;
-
-	// Gratuitous intro zoom!
-	// svg.call(zoom)
-	// 	.transition()
-	// 	.duration(1500)
-	// 	.call(zoom.transform, d3.zoomIdentity
-	// 	.scale(width / (x(d1) - x(d0)))
-	// 	.translate(-x(d0), 0));
 
 	// svg.selectAll("."+country+"-dot")
 	// 	.data(data[country].debt)
@@ -238,9 +226,17 @@ function remCountry( data, country )
 		.remove();
 }
 
-function toggleDots()
+// function toggleDots()
+// {
+// 	console.log("check");
+// }
+
+function resetZoom()
 {
-	console.log("check");
+	d3.selectAll(".path")
+	.call(zoom.transform, d3.zoomIdentity)
+	.transition()
+    .duration(2000);
 }
 
 function zoomed()

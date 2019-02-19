@@ -106,10 +106,13 @@ path
 	height: 20px;
 }
 
-.checkbox
+.toggles a
 {
-	/* display: flex; */
-	color: white;
+	background-color: #eee;
+	color: black;
+	display: block;
+	padding: 12px;
+	text-decoration: none;
 }
 
 .vertical-menu
@@ -119,8 +122,8 @@ path
   
 .vertical-menu a
 {
-	background-color: #eee;
-	color: black;
+	background-color: rgb(126, 126, 126);
+	color: white;
 	display: block;
 	padding: 12px;
 	text-decoration: none;
@@ -129,6 +132,7 @@ path
 .vertical-menu a:hover
 {
 	background-color: #ccc;
+	color: black;
 }
   
   .vertical-menu a.active
