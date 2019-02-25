@@ -45,7 +45,7 @@ menu.className = "menu";
 document.getElementById("container").append(menu);
 
 // load data
-d3.csv("data/data.csv", data => initJSON(data) );
+d3.csv("data/data2.csv", data => initJSON(data) );
 
 // init json
 var json = {};
