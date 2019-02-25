@@ -1,6 +1,8 @@
 # CS5331-DataVisualization Time Series
 Time series visualization on historic public debt data.
 
+Video: https://youtu.be/rk8Rfqx1D2s
+
 ## Description
 This time series presents historical public debt data of multiple countries around the globe. The dataset is from the International Monitary Fund which records the public debt ratio to GDP per country per year. They have records from 1800 to 2015 of about 200 countries.
 
@@ -28,8 +30,8 @@ This web application was developed using the D3.js library and Visual Studio Cod
 
 Another obstacle of this project was the versions of D3. Many examples use version V3 and V5 while I required V4 code. The problem with this is that many of the main functions, specially for the graph axis manipulation, are different from version to version.
 
-# References
--http://data.imf.org
--https://d3js.org/
--https://www.tutorialspoint.com/d3js/
--http://labratrevenge.com/d3-tip/
+## References
+- http://data.imf.org
+- https://d3js.org/
+- https://www.tutorialspoint.com/d3js/
+- http://labratrevenge.com/d3-tip/
